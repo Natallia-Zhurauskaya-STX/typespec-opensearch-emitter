@@ -752,15 +752,15 @@ Emitted code must also stay in the APPSYNC_JS supported subset. `src/emit-graphq
 
 #### Guards
 
-Three tests in `src/emit-graphql-resolver.test.ts` assert every emitted file stays under 32,768 bytes. Measured after the `<field>All` nested list and `terms_all`, which added 714 bytes to every prepare function:
+Three tests in `src/emit-graphql-resolver.test.ts` assert every emitted file stays under 32,768 bytes. Measured after the `<field>All` nested list and `terms_all`, which added 746 bytes to every prepare function:
 
 | Projection | Resolver | Prepare | Search | Headroom |
 | --- | --- | --- | --- | --- |
-| counterparty shape (7 nested sub-models) | 14,464 | 23,580 | 742 | 9,188 |
-| counterparty shape, 2 searchable text fields per sub-model | 14,029 | 23,615 | 742 | 9,153 |
-| synthetic wide (14 sub-models) | 24,211 | 31,408 | 732 | **1,360** |
+| counterparty shape (7 nested sub-models) | 14,464 | 23,612 | 742 | 9,156 |
+| counterparty shape, 2 searchable text fields per sub-model | 14,029 | 23,647 | 742 | 9,121 |
+| synthetic wide (14 sub-models) | 24,211 | 31,440 | 732 | **1,328** |
 
-`prepare` is the constrained file in all three, and headroom depends on projection width. The 14-sub-model guard governs at 1,360 bytes. Real projections are not close — the counterparty shape renders 18,319 bytes as a single file and stays monolithic.
+`prepare` is the constrained file in all three, and headroom depends on projection width. The 14-sub-model guard governs at 1,328 bytes. Real projections are not close — the counterparty shape renders 18,319 bytes as a single file and stays monolithic.
 
 Nested free-text search (issue #158) costs ~53 bytes per `@nested` sub-model carrying searchable text (it scales with path length), plus 166 bytes once for the `NQ` helper. It is charged only to projections that have such a field. The 14-sub-model guard is the shape where that matters: its sub-models are all `@keyword`/date, so it pays nothing, but adding searchable text to every sub-model of a projection that wide would exceed the cap.
 
