@@ -211,6 +211,8 @@ test("emits SearchFilter input with filterable kinds and nested sub-filter", asy
 	assert.ok(sdl.includes("rankLte: Int"));
 	assert.ok(sdl.includes("nicknameExists: Boolean"));
 	assert.ok(sdl.includes("tags: TagSearchFilter"));
+	assert.ok(sdl.includes("tagsAll: [TagSearchFilter!]"));
+	assert.ok(sdl.includes("aliasesAll: [String!]"));
 	assert.ok(sdl.includes("input TagSearchFilter {"));
 	assert.ok(sdl.includes("name: String"));
 	assert.ok(sdl.includes("nameNot: String"));
@@ -227,6 +229,9 @@ test("emits SearchFilter input with filterable kinds and nested sub-filter", asy
 	assert.ok(prepare.includes('k:"nested"'));
 	assert.ok(prepare.includes('p:"tags"'));
 	assert.ok(prepare.includes('{i:"rank",k:"range"'));
+	assert.ok(
+		prepare.includes('{i:"aliasesAll",k:"terms_all",f:"aliases.keyword"}'),
+	);
 	assert.ok(!prepare.includes('"rankGte"'));
 
 	// Issue #130 — analyzed-field filter kinds. The projection's `name` field

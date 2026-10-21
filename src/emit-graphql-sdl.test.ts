@@ -1026,6 +1026,26 @@ describe("emitGraphQLSdl SearchFilter input", () => {
 		assert.ok(result.content.includes("rankIn: [Int!]"));
 	});
 
+	it('emits terms_all as a "<field>All" list scalar input', () => {
+		const projection = makeProjection({
+			name: "InstrumentSearchDoc",
+			fields: [
+				makeField({
+					name: "attributeTerms",
+					keyword: true,
+					filterables: ["terms_all"],
+					type: {
+						kind: "Model",
+						name: "Array",
+						indexer: { value: { kind: "String" } },
+					} as unknown as Type,
+				}),
+			],
+		});
+		const result = emitGraphQLSdl(dummyProgram, projection, defaultOptions);
+		assert.ok(result.content.includes("attributeTermsAll: [String!]"));
+	});
+
 	it("emits a separate SearchFilter input for @nested sub-projection", () => {
 		const subProjection = {
 			projectionModel: { name: "TagSearchDoc" },
@@ -1059,6 +1079,7 @@ describe("emitGraphQLSdl SearchFilter input", () => {
 		const result = emitGraphQLSdl(dummyProgram, projection, defaultOptions);
 		assert.ok(result.content.includes("input PetSearchFilter {"));
 		assert.ok(result.content.includes("tags: TagSearchFilter"));
+		assert.ok(result.content.includes("tagsAll: [TagSearchFilter!]"));
 		assert.ok(result.content.includes("input TagSearchFilter {"));
 		assert.ok(result.content.includes("name: String"));
 		assert.ok(result.content.includes("nameNot: String"));

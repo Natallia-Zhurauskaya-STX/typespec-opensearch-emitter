@@ -438,7 +438,13 @@ function renderSearchFilterField(
 	program: Program,
 	node: FilterSpecNode,
 ): string {
-	if (node.kind === "nested" || node.kind === "object") {
+	if (node.kind === "nested") {
+		return [
+			`  ${node.inputName}: ${node.nestedTypeName}`,
+			`  ${node.inputName}All: [${node.nestedTypeName}!]`,
+		].join("\n");
+	}
+	if (node.kind === "object") {
 		return `  ${node.inputName}: ${node.nestedTypeName ?? "String"}`;
 	}
 	if (node.kind === "exists" || node.kind === "nested_exists") {
@@ -448,7 +454,7 @@ function renderSearchFilterField(
 		? toGraphQLType(program, node.sourceField.type, node.sourceField, "filter")
 		: "String";
 	const baseScalar = stripListWrap(gqlType);
-	if (node.kind === "terms") {
+	if (node.kind === "terms" || node.kind === "terms_all") {
 		return `  ${node.inputName}: [${baseScalar}!]`;
 	}
 	if (node.kind === "range") {
