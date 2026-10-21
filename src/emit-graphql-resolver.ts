@@ -156,9 +156,6 @@ const AUTO_DATE_HISTOGRAM_HELPER = "ADH";
  */
 const NESTED_TEXT_QUERY_HELPER = "NQ";
 
-// Module-level helper emitted next to applyFilterSpec: wraps a bool body in a
-// `nested` query on `path`, with score_mode max when the body has a `must`.
-// Shared by the per-clause and the grouped finalize branches.
 const NESTED_WRAP_HELPER = "NW";
 
 // Bound for the runtime applyFilterSpec walker's fixed-size work slot pool.
@@ -1276,9 +1273,8 @@ function renderBuildSortFunction(): string {
  */
 function renderApplyFilterSpecFunction(slotsLiteral: string): string {
 	return `function ${NESTED_WRAP_HELPER}(path, b) {
-	const n = { path, query: { bool: b } };
-	if (b.must) n.score_mode = "max";
-	return { nested: n };
+	if (b.must) return { nested: { path, score_mode: "max", query: { bool: b } } };
+	return { nested: { path, query: { bool: b } } };
 }
 
 function applyFilterSpec(rootSpec, rootInput, rootOutMusts, rootOutFilters, rootOutMustNots) {

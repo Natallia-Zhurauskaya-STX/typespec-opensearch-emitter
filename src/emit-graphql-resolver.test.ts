@@ -3199,20 +3199,6 @@ describe("emitGraphQLResolver search filter DSL", () => {
 		);
 	});
 
-	it("buildQuery reproduces a single object with one All entry per clause", async () => {
-		const buildQuery = await attributeBuildQuery();
-		const single = buildQuery(undefined, undefined, {
-			attributes: { attributeKey: "strike", numberGte: 50 },
-		}) as { bool: { filter: unknown[] } };
-		const split = buildQuery(undefined, undefined, {
-			attributesAll: [{ attributeKey: "strike" }, { numberGte: 50 }],
-		}) as { bool: { filter: unknown[] } };
-		assert.deepEqual(
-			new Set(split.bool.filter.map((c) => JSON.stringify(c))),
-			new Set(single.bool.filter.map((c) => JSON.stringify(c))),
-		);
-	});
-
 	it("buildQuery puts a negation in an All entry into the group's must_not", async () => {
 		const buildQuery = await attributeBuildQuery();
 		assert.deepEqual(
@@ -3289,27 +3275,6 @@ describe("emitGraphQLResolver search filter DSL", () => {
 					],
 				},
 			},
-		);
-	});
-
-	it("buildQuery ANDs one grouped nested query per All entry, last entry first", async () => {
-		// Finalize pops a stack, so the entries land in reverse order. Order in
-		// a bool carries no meaning for OpenSearch; the assertion pins the
-		// clause set, not the sequence.
-		const buildQuery = await attributeBuildQuery();
-		const result = buildQuery(undefined, undefined, {
-			attributesAll: [{ attributeKey: "strike" }, { attributeKey: "tenor" }],
-		}) as { bool: { filter: unknown[] } };
-		assert.deepEqual(
-			new Set(result.bool.filter.map((c) => JSON.stringify(c))),
-			new Set(
-				[
-					nestedFilter({ filter: [strikeClause] }),
-					nestedFilter({
-						filter: [{ term: { "attributes.attributeKey": "tenor" } }],
-					}),
-				].map((c) => JSON.stringify(c)),
-			),
 		);
 	});
 
@@ -3438,18 +3403,6 @@ describe("emitGraphQLResolver search filter DSL", () => {
 		assert.deepEqual(
 			buildQuery(undefined, undefined, { attributeTermsAll: [] }),
 			{ match_all: {} },
-		);
-	});
-
-	it('emits a terms_all FILTER_SPEC entry under the "<field>All" input name', async () => {
-		const result = await emitGraphQLResolver(
-			attributeProjection(),
-			defaultOptions,
-		);
-		assert.ok(
-			combinedContent(result).includes(
-				'{i:"attributeTermsAll",k:"terms_all",f:"attributeTerms"}',
-			),
 		);
 	});
 

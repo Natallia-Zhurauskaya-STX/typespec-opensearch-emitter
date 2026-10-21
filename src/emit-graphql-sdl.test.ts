@@ -1118,6 +1118,45 @@ describe("emitGraphQLSdl SearchFilter input", () => {
 		const result = emitGraphQLSdl(dummyProgram, projection, defaultOptions);
 		assert.ok(result.content.includes("labels: TagSearchFilter"));
 	});
+
+	it("reports a <field>All input that takes the name of another filter input", () => {
+		const subProjection = {
+			projectionModel: { name: "LegSearchDoc" },
+			sourceModel: { name: "Leg" },
+			indexName: "legs",
+			fields: [
+				makeField({ name: "venue", keyword: true, filterables: ["term"] }),
+			],
+		} as unknown as ResolvedProjection;
+
+		const projection = makeProjection({
+			fields: [
+				makeField({
+					name: "legs",
+					nested: true,
+					subProjection,
+					type: {
+						kind: "Model",
+						name: "Array",
+						indexer: { value: { kind: "Model" } },
+					} as unknown as Type,
+				}),
+				makeField({ name: "legsAll", keyword: true, filterables: ["term"] }),
+			],
+		});
+
+		const { program, diagnostics } = makeCapturingProgram();
+		const result = emitGraphQLSdl(program, projection, defaultOptions);
+		assert.ok(
+			diagnostics.some((d) =>
+				d.code.endsWith("searchfilter-input-name-collision"),
+			),
+		);
+		const filterInput = result.content.match(
+			/input PetSearchFilter \{[^}]*\}/,
+		)?.[0];
+		assert.equal(filterInput?.match(/^ {2}legsAll:/gm)?.length, 1);
+	});
 });
 
 describe("toGraphQLQueryFieldName", () => {

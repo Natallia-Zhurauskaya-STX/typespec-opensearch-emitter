@@ -149,9 +149,8 @@ function buildSort(sortBy) {
 }
 
 function NW(path, b) {
-	const n = { path, query: { bool: b } };
-	if (b.must) n.score_mode = "max";
-	return { nested: n };
+	if (b.must) return { nested: { path, score_mode: "max", query: { bool: b } } };
+	return { nested: { path, query: { bool: b } } };
 }
 
 function applyFilterSpec(rootSpec, rootInput, rootOutMusts, rootOutFilters, rootOutMustNots) {

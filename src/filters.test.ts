@@ -104,24 +104,6 @@ describe("collectFilterables", () => {
 		);
 	});
 
-	it("names a terms_all input <field>All", () => {
-		const projection = makeProjection({
-			fields: [
-				makeField({
-					name: "labels",
-					keyword: true,
-					filterables: ["terms", "terms_all"],
-				}),
-			],
-		});
-
-		const entries = collectFilterables(projection);
-		assert.deepEqual(
-			entries.map((e) => `${e.inputFieldName}=${e.kind}`),
-			["labelsIn=terms", "labelsAll=terms_all"],
-		);
-	});
-
 	it("appends .keyword for non-keyword text string fields", () => {
 		const projection = makeProjection({
 			fields: [

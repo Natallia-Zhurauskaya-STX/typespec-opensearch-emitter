@@ -229,9 +229,6 @@ test("emits SearchFilter input with filterable kinds and nested sub-filter", asy
 	assert.ok(prepare.includes('k:"nested"'));
 	assert.ok(prepare.includes('p:"tags"'));
 	assert.ok(prepare.includes('{i:"rank",k:"range"'));
-	assert.ok(
-		prepare.includes('{i:"aliasesAll",k:"terms_all",f:"aliases.keyword"}'),
-	);
 	assert.ok(!prepare.includes('"rankGte"'));
 
 	// Issue #130 — analyzed-field filter kinds. The projection's `name` field

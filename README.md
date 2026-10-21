@@ -338,7 +338,7 @@ Inside an entry:
 - A `match` clause scores the group: the `nested` query goes into the parent `bool.must` with `score_mode: "max"`, its filters and negations in the same bool.
 - An empty entry adds nothing.
 
-`attributesAll: [{ attributeKey: "strike" }, { numberGte: 50 }]` reproduces the single-object behaviour. `attributes` and `attributesAll` combine: the object's per-clause queries and the entries' grouped queries all land in the parent bool.
+With positive clauses only, one entry per clause matches like the single object: `attributesAll: [{ attributeKey: "strike" }, { numberGte: 50 }]` equals `attributes: { attributeKey: "strike", numberGte: 50 }`. A negation differs: the object excludes every document with a matching element, while an entry needs one element that does not match. `attributes` and `attributesAll` combine: the object's per-clause queries and the entries' grouped queries all land in the parent bool.
 
 ### Override semantics
 

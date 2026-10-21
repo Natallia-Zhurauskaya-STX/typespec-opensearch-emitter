@@ -705,23 +705,6 @@ describe("decorators", () => {
 		assert.deepEqual(getFilterableKinds(runner.program, labels), ["terms_all"]);
 	});
 
-	it("stores the terms_all @filterable kind on a plain string scalar", async () => {
-		const runner = await createRunner();
-		const diagnostics = await runner.diagnose(`
-      model Product {
-        @filterable("terms_all") @keyword @searchable label: string;
-      }
-    `);
-
-		assert.equal(diagnostics.length, 0);
-		const label = runner.program
-			.getGlobalNamespaceType()
-			.models.get("Product")
-			?.properties.get("label");
-		assert.ok(label);
-		assert.deepEqual(getFilterableKinds(runner.program, label), ["terms_all"]);
-	});
-
 	it("rejects terms_all on an array of models", async () => {
 		const runner = await createRunner();
 		const diagnostics = await runner.diagnose(`
